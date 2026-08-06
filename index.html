@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Бенчмарка часу по проєктах</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E9ECF1; --surface:#FFFFFF; --ink:#11151C; --muted:#5D6673;
+  --line:#D3D9E2; --line-soft:#E4E8EE;
+  --actual:#B9762A;      /* факт */
+  --plan:#15706B;        /* кеп із таблиці планування */
+  --over:#A83E36;        /* перевитрата */
+  --wip:#7A6BB5;         /* у роботі */
+  --r:3px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Inter Tight",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:15px; line-height:1.55;
+}
+.num{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace; font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px; margin:0 auto; padding:0 22px 80px}
+
+/* ---------- header ---------- */
+header{padding:52px 0 28px; border-bottom:2px solid var(--ink)}
+.eyebrow{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); font-weight:600}
+h1{
+  font-family:"Bricolage Grotesque",Georgia,serif; font-weight:800;
+  font-size:clamp(34px,6vw,62px); line-height:.98; letter-spacing:-.02em;
+  margin:12px 0 0; max-width:16ch;
+}
+.sub{margin:16px 0 0; max-width:62ch; color:var(--muted)}
+.kpis{display:flex; flex-wrap:wrap; gap:38px; margin-top:34px}
+.kpi b{display:block; font-family:"JetBrains Mono",monospace; font-size:27px; font-weight:600; letter-spacing:-.02em}
+.kpi span{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:600}
+
+/* ---------- sections ---------- */
+section{padding-top:52px}
+h2{
+  font-family:"Bricolage Grotesque",Georgia,serif; font-weight:700;
+  font-size:clamp(22px,3vw,30px); letter-spacing:-.015em; margin:0 0 6px;
+}
+.lede{color:var(--muted); max-width:70ch; margin:0 0 22px}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:22px}
+
+/* ---------- signature: reel strips ---------- */
+.reel{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); overflow:hidden}
+.reel-row{display:grid; grid-template-columns:150px 1fr 100px; gap:16px; align-items:center;
+  padding:15px 18px; border-bottom:1px solid var(--line-soft)}
+.reel-row:last-child{border-bottom:0}
+.reel-row.empty{opacity:.62}
+.rl-name{font-weight:600; font-size:14px}
+.rl-name small{display:block; font-weight:400; color:var(--muted); font-size:11px; letter-spacing:.04em}
+.rl-val{text-align:right; font-family:"JetBrains Mono",monospace; font-weight:600; font-size:17px}
+.rl-val small{display:block; font-size:10px; font-weight:400; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; font-family:"Inter Tight",sans-serif}
+.strip{position:relative; height:44px}
+.strip svg{display:block; width:100%; height:100%; overflow:visible}
+.axis{display:grid; grid-template-columns:150px 1fr 100px; gap:16px; padding:0 18px 12px;
+  font-size:10px; color:var(--muted); letter-spacing:.06em}
+.axis-in{position:relative; height:14px}
+.axis-in span{position:absolute; transform:translateX(-50%); white-space:nowrap}
+.legend{display:flex; flex-wrap:wrap; gap:18px; margin:14px 0 0; font-size:12px; color:var(--muted)}
+.legend i{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; vertical-align:middle}
+.legend .bar-i{width:16px; height:3px; border-radius:0}
+
+/* ---------- toggle ---------- */
+.controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:0 0 18px}
+.tg{border:1px solid var(--line); background:var(--surface); border-radius:100px;
+  padding:7px 15px; font:inherit; font-size:13px; cursor:pointer; color:var(--muted); transition:.14s}
+.tg:hover{border-color:var(--muted); color:var(--ink)}
+.tg[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:#fff}
+.tg:focus-visible{outline:2px solid var(--actual); outline-offset:2px}
+
+/* ---------- finding callout ---------- */
+.finding{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:0;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r); overflow:hidden}
+.finding .txt{padding:26px 28px}
+.finding .txt p{margin:0 0 12px; max-width:48ch}
+.finding .txt p:last-child{margin-bottom:0}
+.big{font-family:"Bricolage Grotesque",serif; font-weight:800; font-size:52px; line-height:1;
+  letter-spacing:-.03em; color:var(--actual); margin-bottom:6px}
+.split{border-left:1px solid var(--line); padding:26px 28px; background:#FBFCFD}
+.sbar{display:flex; height:15px; border-radius:2px; overflow:hidden; margin:14px 0 12px}
+.sbar div{height:100%}
+.slist{font-size:13px}
+.slist div{display:flex; justify-content:space-between; gap:12px; padding:5px 0; border-bottom:1px dotted var(--line-soft)}
+.slist div:last-child{border:0}
+.slist i{display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:8px}
+
+/* ---------- stage table ---------- */
+.stagegrid{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(310px,1fr))}
+.sc{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px 20px}
+.sc h3{margin:0 0 2px; font-size:15px; font-family:"Bricolage Grotesque",serif; font-weight:700}
+.sc .meta{font-size:11px; color:var(--muted); letter-spacing:.05em; text-transform:uppercase; margin-bottom:14px}
+.srow{display:grid; grid-template-columns:74px 1fr 92px; gap:9px; align-items:center; margin-bottom:7px; font-size:12.5px}
+.track{position:relative; height:16px; background:#F1F3F7; border-radius:2px}
+.track .fill{position:absolute; left:0; top:0; height:100%; background:var(--actual); border-radius:2px; opacity:.85}
+.track .capmark{position:absolute; top:-3px; width:2px; height:22px; background:var(--plan)}
+.srow .n{text-align:right; font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--muted)}
+.srow .n b{color:var(--ink); font-weight:600}
+.extra{margin-top:14px; padding-top:12px; border-top:1px dashed var(--line)}
+.extra .srow .fill{background:var(--wip)}
+
+/* ---------- games table ---------- */
+.tblwrap{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); overflow-x:auto}
+table{border-collapse:collapse; width:100%; min-width:720px; font-size:13.5px}
+th{text-align:left; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted);
+  font-weight:600; padding:13px 14px; border-bottom:1px solid var(--line); white-space:nowrap; cursor:pointer; user-select:none}
+th:hover{color:var(--ink)}
+th.r,td.r{text-align:right}
+td{padding:11px 14px; border-bottom:1px solid var(--line-soft)}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#F7F9FB}
+.tag{display:inline-block; font-size:10.5px; letter-spacing:.05em; padding:2px 8px; border-radius:100px;
+  border:1px solid var(--line); color:var(--muted); white-space:nowrap}
+.tag.wip{border-color:var(--wip); color:var(--wip)}
+.gname{font-weight:500}
+.mini{display:inline-block; width:60px; height:6px; background:#F1F3F7; border-radius:2px; vertical-align:middle; margin-right:8px}
+.mini i{display:block; height:100%; background:var(--actual); border-radius:2px}
+
+/* ---------- planning ---------- */
+.plan{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.pc{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:20px; position:relative}
+.pc.est{border-style:dashed; background:#FBFAF8}
+.pc h3{margin:0 0 14px; font-size:15px; font-family:"Bricolage Grotesque",serif; font-weight:700;
+  display:flex; justify-content:space-between; align-items:baseline; gap:8px}
+.pc h3 em{font-style:normal; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.prow{display:flex; justify-content:space-between; align-items:baseline; padding:7px 0; border-bottom:1px dotted var(--line-soft)}
+.prow:last-of-type{border-bottom:0}
+.prow span{font-size:12.5px; color:var(--muted)}
+.prow b{font-family:"JetBrains Mono",monospace; font-size:16px; font-weight:600}
+.prow.hero b{font-size:23px; color:var(--actual)}
+.pnote{margin-top:12px; padding-top:11px; border-top:1px solid var(--line); font-size:11.5px; color:var(--muted); line-height:1.45}
+
+.note{font-size:12.5px; color:var(--muted); margin-top:14px; max-width:78ch}
+.warn{border-left:3px solid var(--over); padding:14px 18px; background:var(--surface);
+  border-radius:0 var(--r) var(--r) 0; font-size:13.5px; margin-top:16px}
+.warn b{color:var(--over)}
+footer{margin-top:60px; padding-top:22px; border-top:1px solid var(--line); font-size:12px; color:var(--muted)}
+@media (max-width:820px){
+  .finding{grid-template-columns:1fr}
+  .split{border-left:0; border-top:1px solid var(--line)}
+  .reel-row,.axis{grid-template-columns:104px 1fr 78px; gap:10px; padding-left:12px; padding-right:12px}
+  .rl-val{font-size:15px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Jira / Tempo · 01.09.2025 — 31.07.2026</div>
+  <h1>Скільки насправді коштує гра</h1>
+  <p class="sub">Розбір залогованого часу по 18 іграх, щоб зрозуміти реальну вартість проєкту кожного рівня складності — і на що спиратись, плануючи наступні.</p>
+  <div class="kpis">
+    <div class="kpi"><b id="k-hours"></b><span>годин залоговано</span></div>
+    <div class="kpi"><b id="k-games"></b><span>ігор у даних</span></div>
+    <div class="kpi"><b id="k-done"></b><span>завершено</span></div>
+    <div class="kpi"><b id="k-people"></b><span>людей</span></div>
+    <div class="kpi"><b id="k-logs"></b><span>ворклогів</span></div>
+  </div>
+</header>
+
+<section>
+  <h2>Вартість гри за рівнем складності</h2>
+  <p class="lede">Кожна смуга — це діапазон реальних витрат по завершених іграх рівня: від найдешевшої до найдорожчої. Товста частина — де опинилась половина проєктів (p25–p75), крапка — медіана. Вертикальна лінія — ваш чинний budget cap із таблиці планування.</p>
+  <div class="controls">
+    <button class="tg" id="tg-wip" aria-pressed="false">Додати ігри, що ще в роботі</button>
+    <button class="tg" id="tg-cap" aria-pressed="true">Показувати budget cap</button>
+  </div>
+  <div class="reel" id="reel"></div>
+  <div class="axis"><div></div><div class="axis-in" id="axis"></div><div></div></div>
+  <div class="legend">
+    <span><i style="background:var(--actual)"></i>медіана факту</span>
+    <span><i class="bar-i" style="background:var(--ink);opacity:.75"></i>половина проєктів (p25–p75)</span>
+    <span><i class="bar-i" style="background:var(--ink);opacity:.22"></i>повний діапазон (min–max)</span>
+    <span><i class="bar-i" style="background:var(--plan);width:3px;height:13px"></i>budget cap</span>
+  </div>
+  <div class="warn" id="gapwarn"></div>
+</section>
+
+<section>
+  <h2>Куди йде час</h2>
+  <p class="lede">Найважливіше в цьому розборі. Ваш budget cap розписує сім виробничих стейджів — Art, Animation, Frontend, Backend, QA, Sounds, Text. Але третина реального часу йде на роботу, якої в кепі немає взагалі.</p>
+  <div class="finding">
+    <div class="txt">
+      <div class="big" id="f-pct"></div>
+      <p><strong>часу — поза budget cap.</strong> Це Project Activities (мітинги, координація, менеджмент), Math, а також Bugs і Bug investigate — вони не закладені в план жодним рядком.</p>
+      <p>Водночас самі виробничі стейджі стабільно закриваються <strong>дешевше</strong> за кеп — у середньому на чверть-третину. Найбільше перезакладено Art і Frontend.</p>
+      <p>Тобто підсумкова цифра кепа випадково майже збігається з реальністю, але всередині вона неправильна: ви перекладаєте на продакшн і зовсім не бачите менеджмент та багфікс.</p>
+    </div>
+    <div class="split">
+      <div class="eyebrow">Розподіл усіх 22 381 год</div>
+      <div class="sbar" id="cbar"></div>
+      <div class="slist" id="clist"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>План проти факту, по стейджах</h2>
+  <p class="lede">Медіана фактичних годин на завершену гру проти budget cap. Помаранчева смуга — факт, бірюзова риска — кеп. Знизу окремо — те, що в кепі не передбачене.</p>
+  <div class="stagegrid" id="stages"></div>
+</section>
+
+<section>
+  <h2>Ігри</h2>
+  <p class="lede">Клік по заголовку сортує. «У роботі» — це проєкти, де логування ще активне або не було фази Release Candidate; у бенчмарку вони не входять, бо їхня підсумкова цифра ще виросте.</p>
+  <div class="controls" id="lvfilter"></div>
+  <div class="tblwrap">
+    <table>
+      <thead><tr>
+        <th data-k="name">Гра</th><th data-k="level">Рівень</th>
+        <th data-k="hours" class="r">Годин</th><th data-k="weeks" class="r">Тижнів</th>
+        <th data-k="perweek" class="r">Год/тиждень</th><th data-k="people" class="r">Людей</th>
+        <th data-k="done">Статус</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Скільки закладати на наступну гру</h2>
+  <p class="lede">Три сценарії на рівень. «Реалістично» — медіана завершених проєктів; це та цифра, з якої варто починати розмову. «З буфером» — p75: у цей обсяг вкладаються три чверті проєктів.</p>
+  <div class="plan" id="plan"></div>
+  <p class="note" id="plannote"></p>
+</section>
+
+<footer>
+  Джерело: вивантаження Tempo (12 107 ворклогів, 01.09.2025–31.07.2026) + таблиця планування з budget cap.
+  Рівні складності взято з колонки Classification. Медіана використана замість середнього, бо на вибірці 5–6 проєктів один викид зміщує середнє на сотні годин.
+</footer>
+</div>
+<script>
+const DATA = {"meta": {"total_hours": 22381, "logs": 12107, "games": 18, "people": 49, "start": "2025-09-01", "end": "2026-07-31"}, "games": [{"Space Name": "3x3 Football Strike: Hold the Spin", "hours": 661.436, "logs": 413, "people": 21, "level": "Easy", "weeks": 19.9, "tail_pct": 0.0, "rc_hours": 48.1, "done": true, "Animation": 112.75, "Art": 106.75, "Backend": 0.0, "Bug investigate": 0.0, "Bugs": 31.0, "Frontend": 67.5, "Math": 0.0, "Project Activities": 114.768, "QA": 117.168, "Sounds": 104.0, "Text": 5.0, "Unassigned": 2.5}, {"Space Name": "3x5 Double Blazing", "hours": 1059.331, "logs": 611, "people": 22, "level": "Easy", "weeks": 27.9, "tail_pct": 0.0, "rc_hours": 55.0, "done": true, "Animation": 156.5, "Art": 127.417, "Backend": 99.583, "Bug investigate": 0.0, "Bugs": 33.0, "Frontend": 142.0, "Math": 54.0, "Project Activities": 188.913, "QA": 156.918, "Sounds": 58.0, "Text": 40.0, "Unassigned": 3.0}, {"Space Name": "3x5 Joker: Hold The Spin", "hours": 860.632, "logs": 540, "people": 20, "level": "Easy", "weeks": 21.9, "tail_pct": 0.0, "rc_hours": 57.6, "done": true, "Animation": 160.5, "Art": 156.667, "Backend": 12.0, "Bug investigate": 0.0, "Bugs": 69.0, "Frontend": 104.0, "Math": 0.0, "Project Activities": 172.08, "QA": 170.885, "Sounds": 2.5, "Text": 1.0, "Unassigned": 12.0}, {"Space Name": "3x5 Royal Piggy: Hold The Spin", "hours": 635.383, "logs": 399, "people": 20, "level": "Medium", "weeks": 30.4, "tail_pct": 0.0, "rc_hours": 47.4, "done": true, "Animation": 11.0, "Art": 17.0, "Backend": 54.0, "Bug investigate": 54.299, "Bugs": 49.75, "Frontend": 151.5, "Math": 42.0, "Project Activities": 88.816, "QA": 139.518, "Sounds": 0.0, "Text": 5.0, "Unassigned": 22.5}, {"Space Name": "4 Clovers Express", "hours": 394.75, "logs": 279, "people": 5, "level": "Medium+", "weeks": 7.4, "tail_pct": 73.0, "rc_hours": 0.0, "done": false, "Animation": 0.0, "Art": 289.25, "Backend": 0.0, "Bug investigate": 0.0, "Bugs": 0.0, "Frontend": 0.0, "Math": 0.0, "Project Activities": 103.25, "QA": 0.0, "Sounds": 0.0, "Text": 0.0, "Unassigned": 2.25}, {"Space Name": "Buffalo Supreme", "hours": 1650.915, "logs": 779, "people": 24, "level": "Medium", "weeks": 29.7, "tail_pct": 5.4, "rc_hours": 81.5, "done": false, "Animation": 158.75, "Art": 332.837, "Backend": 146.0, "Bug investigate": 49.333, "Bugs": 75.167, "Frontend": 203.5, "Math": 135.0, "Project Activities": 235.415, "QA": 171.08, "Sounds": 105.5, "Text": 38.333, "Unassigned": 0.0}, {"Space Name": "Charged Wins: Power Frames", "hours": 1209.449, "logs": 577, "people": 21, "level": "Easy", "weeks": 28.9, "tail_pct": 0.3, "rc_hours": 64.5, "done": true, "Animation": 147.0, "Art": 177.75, "Backend": 81.25, "Bug investigate": 0.0, "Bugs": 40.0, "Frontend": 189.0, "Math": 116.0, "Project Activities": 163.132, "QA": 182.817, "Sounds": 75.0, "Text": 37.5, "Unassigned": 0.0}, {"Space Name": "Coin Vortex: Hold the Spin", "hours": 1316.936, "logs": 743, "people": 26, "level": "Easy-Medium", "weeks": 22.7, "tail_pct": 0.1, "rc_hours": 56.1, "done": true, "Animation": 209.0, "Art": 165.75, "Backend": 85.5, "Bug investigate": 0.0, "Bugs": 27.167, "Frontend": 160.883, "Math": 115.25, "Project Activities": 224.118, "QA": 200.768, "Sounds": 84.0, "Text": 38.0, "Unassigned": 6.5}, {"Space Name": "Dynasty Coin 10000: Hold the Spin", "hours": 1317.137, "logs": 706, "people": 24, "level": "Medium", "weeks": 29.3, "tail_pct": 0.0, "rc_hours": 54.9, "done": true, "Animation": 213.5, "Art": 425.247, "Backend": 8.0, "Bug investigate": 0.0, "Bugs": 53.5, "Frontend": 94.25, "Math": 0.0, "Project Activities": 230.486, "QA": 171.404, "Sounds": 98.0, "Text": 7.75, "Unassigned": 15.0}, {"Space Name": "Joker Catcher", "hours": 1407.145, "logs": 922, "people": 19, "level": "Medium", "weeks": 15.6, "tail_pct": 0.0, "rc_hours": 139.0, "done": true, "Animation": 54.5, "Art": 20.5, "Backend": 88.5, "Bug investigate": 0.0, "Bugs": 214.089, "Frontend": 356.75, "Math": 0.0, "Project Activities": 252.423, "QA": 379.383, "Sounds": 6.5, "Text": 32.5, "Unassigned": 2.0}, {"Space Name": "Lava Power: Hold the Spin", "hours": 1980.353, "logs": 989, "people": 25, "level": "Medium+", "weeks": 19.0, "tail_pct": 20.5, "rc_hours": 85.8, "done": false, "Animation": 288.501, "Art": 246.417, "Backend": 137.0, "Bug investigate": 0.0, "Bugs": 90.667, "Frontend": 261.666, "Math": 186.0, "Project Activities": 315.234, "QA": 309.868, "Sounds": 101.5, "Text": 37.0, "Unassigned": 6.5}, {"Space Name": "Nitro Wilds", "hours": 2197.083, "logs": 1168, "people": 25, "level": "Medium", "weeks": 37.0, "tail_pct": 0.0, "rc_hours": 97.9, "done": true, "Animation": 190.417, "Art": 496.666, "Backend": 205.833, "Bug investigate": 12.75, "Bugs": 61.75, "Frontend": 210.25, "Math": 95.0, "Project Activities": 508.245, "QA": 286.922, "Sounds": 89.0, "Text": 39.75, "Unassigned": 0.5}, {"Space Name": "Only Diamonds", "hours": 1612.746, "logs": 835, "people": 21, "level": "Medium", "weeks": 37.6, "tail_pct": 0.0, "rc_hours": 30.7, "done": true, "Animation": 147.583, "Art": 61.25, "Backend": 150.5, "Bug investigate": 0.0, "Bugs": 68.083, "Frontend": 253.25, "Math": 83.0, "Project Activities": 370.163, "QA": 323.417, "Sounds": 103.0, "Text": 47.0, "Unassigned": 5.5}, {"Space Name": "Piggy Vault", "hours": 952.353, "logs": 417, "people": 11, "level": "Easy-Medium", "weeks": 21.6, "tail_pct": 33.5, "rc_hours": 13.0, "done": false, "Animation": 152.5, "Art": 250.668, "Backend": 93.25, "Bug investigate": 0.0, "Bugs": 7.0, "Frontend": 114.25, "Math": 54.0, "Project Activities": 116.917, "QA": 60.751, "Sounds": 85.0, "Text": 18.017, "Unassigned": 0.0}, {"Space Name": "Triple Joker Catcher", "hours": 1609.914, "logs": 905, "people": 22, "level": "Easy-Medium", "weeks": 29.6, "tail_pct": 0.0, "rc_hours": 70.9, "done": true, "Animation": 163.25, "Art": 151.583, "Backend": 87.0, "Bug investigate": 101.168, "Bugs": 115.167, "Frontend": 226.0, "Math": 148.0, "Project Activities": 352.667, "QA": 211.579, "Sounds": 12.0, "Text": 40.0, "Unassigned": 1.5}, {"Space Name": "Vinnie Volt: Cabaret Wilds", "hours": 167.167, "logs": 149, "people": 15, "level": "Easy", "weeks": 16.7, "tail_pct": 0.3, "rc_hours": 33.0, "done": true, "Animation": 0.0, "Art": 13.0, "Backend": 8.0, "Bug investigate": 0.0, "Bugs": 6.5, "Frontend": 45.5, "Math": 0.0, "Project Activities": 35.5, "QA": 58.667, "Sounds": 0.0, "Text": 0.0, "Unassigned": 0.0}, {"Space Name": "Vinnie Volt: Devil Wilds", "hours": 2439.369, "logs": 1142, "people": 23, "level": "Medium", "weeks": 33.7, "tail_pct": 0.0, "rc_hours": 61.4, "done": true, "Animation": 312.55, "Art": 396.25, "Backend": 183.916, "Bug investigate": 105.903, "Bugs": 97.0, "Frontend": 254.5, "Math": 309.25, "Project Activities": 375.167, "QA": 244.666, "Sounds": 103.0, "Text": 38.0, "Unassigned": 19.167}, {"Space Name": "Vinnie Volt: Dracula Wilds", "hours": 908.53, "logs": 533, "people": 20, "level": "Reskin Medium", "weeks": 23.1, "tail_pct": 0.4, "rc_hours": 65.8, "done": true, "Animation": 196.0, "Art": 260.832, "Backend": 3.0, "Bug investigate": 0.0, "Bugs": 16.5, "Frontend": 72.0, "Math": 0.0, "Project Activities": 166.367, "QA": 88.831, "Sounds": 90.0, "Text": 10.0, "Unassigned": 5.0}], "cap": {"Hard": {"Animation": 300, "Art": 500, "Backend": 200, "Frontend": 500, "QA": 375, "Sounds": 110, "Text": 60}, "Medium+": {"Animation": 250, "Art": 400, "Backend": 175, "Frontend": 400, "QA": 350, "Sounds": 110, "Text": 50}, "Medium": {"Animation": 225, "Art": 350, "Backend": 150, "Frontend": 350, "QA": 325, "Sounds": 110, "Text": 50}, "Easy-Medium": {"Animation": 200, "Art": 275, "Backend": 125, "Frontend": 300, "QA": 250, "Sounds": 80, "Text": 50}, "Easy": {"Animation": 175, "Art": 200, "Backend": 100, "Frontend": 225, "QA": 175, "Sounds": 80, "Text": 50}, "Reskin Hard": {"Animation": 300, "Art": 500, "Backend": 0, "Frontend": 175, "QA": 150, "Sounds": 100, "Text": 10}, "Reskin Medium": {"Animation": 225, "Art": 400, "Backend": 0, "Frontend": 150, "QA": 125, "Sounds": 100, "Text": 10}}, "order": ["Easy", "Easy-Medium", "Medium", "Medium+", "Hard", "Reskin Medium", "Reskin Hard"], "cap_stages": ["Art", "Animation", "Frontend", "Backend", "QA", "Sounds", "Text"], "components": {"Project Activities": 4013.7, "Art": 3695.8, "QA": 3274.6, "Frontend": 2906.8, "Animation": 2674.3, "Backend": 1443.3, "Math": 1337.5, "Sounds": 1117.0, "Bugs": 1055.3, "Text": 434.9, "Bug investigate": 323.5, "Unassigned": 103.9}, "monthly": {"2025-09": 872.0, "2025-10": 1277.0, "2025-11": 1687.0, "2025-12": 2194.0, "2026-01": 2445.0, "2026-02": 3290.0, "2026-03": 3460.0, "2026-04": 2744.0, "2026-05": 1918.0, "2026-06": 1306.0, "2026-07": 1187.0}, "dates": {"3x3 Football Strike: Hold the Spin": ["2026-01-09", "2026-05-29"], "3x5 Double Blazing": ["2025-10-15", "2026-04-29"], "3x5 Joker: Hold The Spin": ["2025-09-08", "2026-02-09"], "3x5 Royal Piggy: Hold The Spin": ["2025-09-05", "2026-04-06"], "4 Clovers Express": ["2026-06-08", "2026-07-30"], "Buffalo Supreme": ["2025-12-24", "2026-07-21"], "Charged Wins: Power Frames": ["2026-01-08", "2026-07-30"], "Coin Vortex: Hold the Spin": ["2026-02-03", "2026-07-13"], "Dynasty Coin 10000: Hold the Spin": ["2025-11-18", "2026-06-12"], "Joker Catcher": ["2025-09-01", "2025-12-19"], "Lava Power: Hold the Spin": ["2026-03-18", "2026-07-30"], "Nitro Wilds": ["2025-09-08", "2026-05-26"], "Only Diamonds": ["2025-09-01", "2026-05-22"], "Piggy Vault": ["2026-03-02", "2026-07-31"], "Triple Joker Catcher": ["2025-11-03", "2026-05-29"], "Vinnie Volt: Cabaret Wilds": ["2026-03-19", "2026-07-15"], "Vinnie Volt: Devil Wilds": ["2025-10-23", "2026-06-16"], "Vinnie Volt: Dracula Wilds": ["2026-02-10", "2026-07-23"]}};
+</script>
+<script>
+const CAP_S = DATA.cap_stages, OTHER = ['Math','Project Activities','Bugs','Bug investigate'];
+const LEVELS = ['Easy','Easy-Medium','Medium','Medium+','Hard','Reskin Medium','Reskin Hard'];
+const LBL = {'Easy':'Easy','Easy-Medium':'Easy-Medium','Medium':'Medium','Medium+':'Medium+',
+             'Hard':'Hard','Reskin Medium':'Reskin Medium','Reskin Hard':'Reskin Hard'};
+const fmt = n => Math.round(n).toLocaleString('uk-UA').replace(/\u00a0/g,' ');
+let incWip = false, showCap = true, lvFilter = null, sortK = 'hours', sortDir = -1;
+
+const capTotal = lv => CAP_S.reduce((s,k)=>s+((DATA.cap[lv]||{})[k]||0),0);
+const pool = () => DATA.games.filter(g => incWip || g.done);
+function q(arr,p){ if(!arr.length) return 0; const a=[...arr].sort((x,y)=>x-y);
+  const i=(a.length-1)*p, lo=Math.floor(i), hi=Math.ceil(i);
+  return lo===hi ? a[lo] : a[lo]+(a[hi]-a[lo])*(i-lo); }
+
+function bench(lv){
+  const gs = pool().filter(g=>g.level===lv);
+  if(!gs.length) return {n:0, cap:capTotal(lv)};
+  const h = gs.map(g=>g.hours);
+  const st = {}; [...CAP_S,...OTHER].forEach(k => st[k] = q(gs.map(g=>g[k]||0),.5));
+  return {n:gs.length, min:Math.min(...h), max:Math.max(...h), p25:q(h,.25), p50:q(h,.5),
+          p75:q(h,.75), weeks:q(gs.map(g=>g.weeks),.5), cap:capTotal(lv), st, games:gs};
+}
+
+/* ---------- KPIs ---------- */
+document.getElementById('k-hours').textContent = fmt(DATA.meta.total_hours);
+document.getElementById('k-games').textContent = DATA.meta.games;
+document.getElementById('k-done').textContent = DATA.games.filter(g=>g.done).length;
+document.getElementById('k-people').textContent = DATA.meta.people;
+document.getElementById('k-logs').textContent = fmt(DATA.meta.logs);
+
+/* ---------- reel strips ---------- */
+function drawReel(){
+  const rows = LEVELS.map(lv=>({lv, b:bench(lv)}));
+  const vals = rows.flatMap(r=>r.b.n?[r.b.max,r.b.cap]:[r.b.cap]).filter(v=>v>0);
+  const MAX = Math.ceil(Math.max(...vals,1)/500)*500;
+  const x = v => (v/MAX)*100;
+  document.getElementById('reel').innerHTML = rows.map(({lv,b})=>{
+    if(!b.n) return `<div class="reel-row empty">
+        <div class="rl-name">${LBL[lv]}<small>немає завершених</small></div>
+        <div class="strip"><svg viewBox="0 0 100 44" preserveAspectRatio="none">
+          ${showCap&&b.cap?`<line x1="${x(b.cap)}" y1="6" x2="${x(b.cap)}" y2="38" stroke="var(--plan)" stroke-width=".45" vector-effect="non-scaling-stroke"/>`:''}
+        </svg></div>
+        <div class="rl-val" style="color:var(--muted);font-size:13px">—<small>кеп ${fmt(b.cap)}</small></div></div>`;
+    const over = b.p50 > b.cap;
+    return `<div class="reel-row">
+      <div class="rl-name">${LBL[lv]}<small>${b.n} ${b.n===1?'проєкт':(b.n<5?'проєкти':'проєктів')} · ~${b.weeks.toFixed(0)} тиж</small></div>
+      <div class="strip"><svg viewBox="0 0 100 44" preserveAspectRatio="none">
+        <line x1="${x(b.min)}" y1="22" x2="${x(b.max)}" y2="22" stroke="var(--ink)" stroke-opacity=".22" stroke-width="7"/>
+        <rect x="${x(b.p25)}" y="15" width="${Math.max(x(b.p75)-x(b.p25),.4)}" height="14" fill="var(--ink)" fill-opacity=".75"/>
+        <circle cx="${x(b.p50)}" cy="22" r="3.2" fill="var(--actual)" vector-effect="non-scaling-stroke"/>
+        ${showCap?`<line x1="${x(b.cap)}" y1="5" x2="${x(b.cap)}" y2="39" stroke="var(--plan)" stroke-width=".55" vector-effect="non-scaling-stroke"/>`:''}
+      </svg></div>
+      <div class="rl-val" style="${over?'color:var(--over)':''}">${fmt(b.p50)}<small>медіана, год</small></div></div>`;
+  }).join('');
+  const ax = document.getElementById('axis'); ax.innerHTML='';
+  for(let v=0; v<=MAX; v+=500){ const s=document.createElement('span');
+    s.style.left = x(v)+'%'; s.textContent = v ? fmt(v) : '0'; ax.appendChild(s); }
+  const missing = LEVELS.filter(lv=>!bench(lv).n);
+  document.getElementById('gapwarn').innerHTML = missing.length
+    ? `<b>Дірка в даних:</b> для рівнів ${missing.map(m=>LBL[m]).join(', ')} немає жодного завершеного проєкту, тож бенчмарки з фактом там не існує. Нижче для них дана оцінка через пропорцію кепа — користуйтесь обережно.`
+    : `Усі рівні мають завершені проєкти.`;
+}
+
+/* ---------- components ---------- */
+(function(){
+  const tot = Object.values(DATA.components).reduce((a,b)=>a+b,0);
+  const outside = OTHER.reduce((s,k)=>s+(DATA.components[k]||0),0);
+  document.getElementById('f-pct').textContent = Math.round(outside/tot*100)+'%';
+  const cols = {'Project Activities':'#7A6BB5','Math':'#9A86C9','Bugs':'#C2705F','Bug investigate':'#D49A8C',
+    'Art':'#B9762A','Animation':'#CE9A52','Frontend':'#15706B','QA':'#3D8F86','Backend':'#6BA9A2',
+    'Sounds':'#8FBCB6','Text':'#B4CFCB','Unassigned':'#C9CFD8'};
+  const ent = Object.entries(DATA.components).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('cbar').innerHTML = ent.map(([k,v])=>
+    `<div style="width:${v/tot*100}%;background:${cols[k]||'#ccc'}" title="${k}"></div>`).join('');
+  document.getElementById('clist').innerHTML = ent.map(([k,v])=>
+    `<div><span><i style="background:${cols[k]||'#ccc'}"></i>${k}${OTHER.includes(k)?' *':''}</span>
+     <span class="num">${fmt(v)} · ${(v/tot*100).toFixed(1)}%</span></div>`).join('')
+    + `<div style="border:0;color:var(--muted);font-size:11.5px;padding-top:9px">* немає в budget cap</div>`;
+})();
+
+/* ---------- stage cards ---------- */
+function drawStages(){
+  document.getElementById('stages').innerHTML = LEVELS.map(lv=>{
+    const b = bench(lv); if(!b.n) return '';
+    const cap = DATA.cap[lv]||{};
+    const mx = Math.max(...CAP_S.map(s=>Math.max(b.st[s]||0, cap[s]||0)), 1);
+    const row = (s,val,capv,cls) => {
+      const d = capv ? Math.round((val/capv-1)*100) : null;
+      return `<div class="srow ${cls||''}"><span>${s}</span>
+        <div class="track"><div class="fill" style="width:${Math.min(val/mx*100,100)}%"></div>
+        ${capv?`<div class="capmark" style="left:${Math.min(capv/mx*100,100)}%"></div>`:''}</div>
+        <span class="n"><b>${fmt(val)}</b>${capv?` / ${fmt(capv)}`:''}${d!==null&&Math.abs(d)>=15?` <span style="color:${d>0?'var(--over)':'var(--muted)'}">${d>0?'+':''}${d}%</span>`:''}</span></div>`;
+    };
+    const outside = OTHER.reduce((s,k)=>s+(b.st[k]||0),0);
+    return `<div class="sc"><h3>${LBL[lv]}</h3>
+      <div class="meta">${b.n} завершен${b.n===1?'а гра':(b.n<5?'і гри':'их ігор')} · медіана ${fmt(b.p50)} год</div>
+      ${CAP_S.map(s=>row(s,b.st[s]||0,cap[s]||0)).join('')}
+      <div class="extra"><div class="meta" style="margin-bottom:9px">Поза budget cap · ${fmt(outside)} год</div>
+      ${OTHER.filter(s=>(b.st[s]||0)>0).map(s=>row(s,b.st[s],0)).join('')||'<div class="srow"><span style="color:var(--muted)">—</span></div>'}</div></div>`;
+  }).join('');
+}
+
+/* ---------- table ---------- */
+function drawFilter(){
+  const lv = ['Усі', ...LEVELS.filter(l=>DATA.games.some(g=>g.level===l))];
+  document.getElementById('lvfilter').innerHTML = lv.map(l=>
+    `<button class="tg" data-lv="${l}" aria-pressed="${(l==='Усі'&&!lvFilter)||l===lvFilter}">${l}</button>`).join('');
+  document.querySelectorAll('#lvfilter .tg').forEach(b=>b.onclick=()=>{
+    lvFilter = b.dataset.lv==='Усі' ? null : b.dataset.lv; drawFilter(); drawTable(); });
+}
+function drawTable(){
+  let gs = DATA.games.filter(g=>!lvFilter || g.level===lvFilter).map(g=>({
+    name:g['Space Name'], level:g.level, hours:g.hours, weeks:g.weeks,
+    perweek: g.weeks>0 ? g.hours/g.weeks : 0, people:g.people, done:g.done}));
+  gs.sort((a,b)=>{ const x=a[sortK], y=b[sortK];
+    return (typeof x==='string' ? x.localeCompare(y,'uk') : (x===y?0:(x<y?-1:1))) * sortDir; });
+  const mx = Math.max(...gs.map(g=>g.hours),1);
+  document.getElementById('tbody').innerHTML = gs.map(g=>{
+    const [d0,d1] = DATA.dates[g.name]||['',''];
+    return `<tr>
+      <td class="gname">${g.name}<div style="font-size:11px;color:var(--muted)">${d0} → ${d1}</div></td>
+      <td><span class="tag">${g.level}</span></td>
+      <td class="r num"><span class="mini"><i style="width:${g.hours/mx*100}%"></i></span>${fmt(g.hours)}</td>
+      <td class="r num">${g.weeks.toFixed(0)}</td>
+      <td class="r num">${g.perweek.toFixed(0)}</td>
+      <td class="r num">${g.people}</td>
+      <td>${g.done?'<span class="tag">завершено</span>':'<span class="tag wip">у роботі</span>'}</td></tr>`;
+  }).join('');
+}
+document.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>{
+  const k=th.dataset.k; sortDir = (sortK===k) ? -sortDir : (k==='name'?1:-1); sortK=k; drawTable(); });
+
+/* ---------- planning ---------- */
+function drawPlan(){
+  const ref = bench('Medium');
+  document.getElementById('plan').innerHTML = LEVELS.map(lv=>{
+    const b = bench(lv), cap = capTotal(lv);
+    if(b.n>=2){
+      return `<div class="pc"><h3>${LBL[lv]}<em>${b.n} проєкт${b.n<5?'и':'ів'}</em></h3>
+        <div class="prow"><span>Оптимістично (p25)</span><b>${fmt(b.p25)}</b></div>
+        <div class="prow hero"><span>Реалістично (медіана)</span><b>${fmt(b.p50)}</b></div>
+        <div class="prow"><span>З буфером (p75)</span><b>${fmt(b.p75)}</b></div>
+        <div class="prow"><span>Тривалість, тижнів</span><b>${b.weeks.toFixed(0)}</b></div>
+        <div class="pnote">Чинний кеп ${fmt(cap)} год — ${b.p50>cap?`<span style="color:var(--over)">нижчий за факт на ${fmt(b.p50-cap)} год</span>`:`вищий за факт на ${fmt(cap-b.p50)} год`}.</div></div>`;
+    }
+    if(b.n===1){
+      return `<div class="pc est"><h3>${LBL[lv]}<em>1 проєкт</em></h3>
+        <div class="prow hero"><span>Єдине спостереження</span><b>${fmt(b.p50)}</b></div>
+        <div class="prow"><span>Чинний кеп</span><b>${fmt(cap)}</b></div>
+        <div class="pnote">Одна гра — це не бенчмарка, а точка. Потрібно ще щонайменше два завершені проєкти цього рівня.</div></div>`;
+    }
+    const est = ref.n ? ref.p50 * cap / capTotal('Medium') : 0;
+    return `<div class="pc est"><h3>${LBL[lv]}<em>оцінка</em></h3>
+      <div class="prow hero"><span>Орієнтовно</span><b>~${fmt(est)}</b></div>
+      <div class="prow"><span>Чинний кеп</span><b>${fmt(cap)}</b></div>
+      <div class="pnote">Завершених проєктів немає. Цифра — це медіана Medium, перерахована через співвідношення кепів. Використовувати лише як стартову гіпотезу.</div></div>`;
+  }).join('');
+  const m = bench('Medium');
+  document.getElementById('plannote').textContent = m.n
+    ? `Тривалість рахується від першого до останнього ворклогу, тож включає паузи й перемикання між проєктами — це календарний строк, а не завантаження команди. Медіанна гра рівня Medium йде ${m.weeks.toFixed(0)} тижнів при ${fmt(m.p50)} годинах, тобто близько ${fmt(m.p50/m.weeks)} год на тиждень сумарно по всій команді.`
+    : '';
+}
+
+function redraw(){ drawReel(); drawStages(); drawPlan(); }
+document.getElementById('tg-wip').onclick = e => {
+  incWip = !incWip; e.target.setAttribute('aria-pressed', incWip);
+  e.target.textContent = incWip ? 'Рахувати лише завершені' : 'Додати ігри, що ще в роботі'; redraw(); };
+document.getElementById('tg-cap').onclick = e => {
+  showCap = !showCap; e.target.setAttribute('aria-pressed', showCap); drawReel(); };
+drawFilter(); drawTable(); redraw();
+</script>
+</body></html>
