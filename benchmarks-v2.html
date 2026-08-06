@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Нові бенчмарки по складності та компетенціях</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#E9ECF1;--surface:#FFF;--ink:#11151C;--muted:#5D6673;--line:#D3D9E2;--line-soft:#E4E8EE;
+ --actual:#B9762A;--plan:#15706B;--over:#A83E36;--risk:#7A6BB5;--r:3px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Inter Tight",system-ui,sans-serif;font-size:15px;line-height:1.55}
+.num{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px 80px}
+header{padding:52px 0 26px;border-bottom:2px solid var(--ink)}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:"Bricolage Grotesque",Georgia,serif;font-weight:800;font-size:clamp(32px,5.5vw,56px);
+ line-height:1;letter-spacing:-.02em;margin:12px 0 0;max-width:18ch}
+.sub{margin:16px 0 0;max-width:66ch;color:var(--muted)}
+section{padding-top:48px}
+h2{font-family:"Bricolage Grotesque",serif;font-weight:700;font-size:clamp(21px,3vw,29px);letter-spacing:-.015em;margin:0 0 6px}
+.lede{color:var(--muted);max-width:72ch;margin:0 0 20px}
+
+/* risk control */
+.riskbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px 26px;
+ display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:30px;align-items:center}
+.riskbox p{margin:0;font-size:13.5px;color:var(--muted);max-width:60ch}
+.riskbox p b{color:var(--ink)}
+.sl{display:block;width:100%;margin:12px 0 6px;accent-color:var(--risk)}
+.slrow{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);letter-spacing:.04em}
+.rval{font-family:"Bricolage Grotesque",serif;font-weight:800;font-size:44px;line-height:1;color:var(--risk);letter-spacing:-.03em}
+.rval small{display:block;font-family:"Inter Tight",sans-serif;font-size:11px;font-weight:600;letter-spacing:.09em;
+ text-transform:uppercase;color:var(--muted);margin-top:5px}
+
+/* level blocks */
+.lvl{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:16px;overflow:hidden}
+.lvl-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:start;
+ padding:20px 24px;border-bottom:1px solid var(--line)}
+.lvl-head h3{margin:0;font-family:"Bricolage Grotesque",serif;font-weight:700;font-size:21px;letter-spacing:-.01em}
+.badge{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;
+ padding:3px 9px;border-radius:100px;margin-left:9px;vertical-align:3px;border:1px solid}
+.b-high{color:var(--plan);border-color:var(--plan)}
+.b-mid{color:var(--actual);border-color:var(--actual)}
+.b-low{color:var(--over);border-color:var(--over)}
+.lvl-head .why{font-size:12.5px;color:var(--muted);margin:7px 0 0;max-width:64ch}
+.tot{text-align:right;white-space:nowrap}
+.tot b{display:block;font-family:"JetBrains Mono",monospace;font-size:29px;font-weight:600;letter-spacing:-.02em}
+.tot span{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tot .delta{font-size:12px;letter-spacing:0;text-transform:none;margin-top:4px;font-weight:500}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{text-align:left;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+ font-weight:600;padding:11px 24px;border-bottom:1px solid var(--line-soft);white-space:nowrap}
+th.r,td.r{text-align:right}
+td{padding:9px 24px;border-bottom:1px solid var(--line-soft)}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#F7F9FB}
+.gtag{display:inline-block;font-size:10px;letter-spacing:.05em;padding:1px 7px;border-radius:100px;
+ border:1px solid var(--line-soft);color:var(--muted);margin-left:8px}
+.bar{position:relative;height:14px;background:#F1F3F7;border-radius:2px;min-width:70px}
+.bar i{position:absolute;left:0;top:0;height:100%;background:var(--actual);border-radius:2px;opacity:.85}
+.bar u{position:absolute;top:0;height:100%;background:var(--risk);opacity:.85;border-radius:0 2px 2px 0}
+.new{font-weight:600}
+.was{color:var(--muted);font-size:12.5px}
+.dl{font-size:11.5px}
+.up{color:var(--over)}.dn{color:var(--plan)}
+.miss{color:var(--risk);font-size:11px;letter-spacing:.05em}
+
+/* hygiene */
+.hyg td,.hyg th{padding:9px 16px}
+.hyg{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
+.hyg table{min-width:640px}
+.pill{display:inline-block;min-width:44px;text-align:center;font-family:"JetBrains Mono",monospace;
+ font-size:12px;padding:2px 7px;border-radius:100px;background:#F1F3F7}
+.pill.hot{background:#F3E9E8;color:var(--over)}
+.pill.warm{background:#F6EFE6;color:var(--actual)}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px;max-width:80ch}
+.warn{border-left:3px solid var(--over);padding:14px 18px;background:var(--surface);border-radius:0 var(--r) var(--r) 0;font-size:13.5px;margin-top:18px}
+.warn b{color:var(--over)}
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+@media (max-width:860px){.riskbox{grid-template-columns:1fr}.lvl-head{grid-template-columns:1fr}
+ .tot{text-align:left}th,td{padding-left:14px;padding-right:14px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body><div class="wrap">
+
+<header>
+  <div class="eyebrow">на основі 22 381 залогованої години · 18 ігор · 09.2025–07.2026</div>
+  <h1>Нові бенчмарки по складності та компетенціях</h1>
+  <p class="sub">Кожна цифра — це медіана факту по завершених іграх рівня, розкладена по компонентах і збільшена на поправку про недологування. Компоненти, яких у старому budget cap не було, тут включені повністю.</p>
+</header>
+
+<section>
+  <h2>Поправка на недологування</h2>
+  <p class="lede">Надбавка не однакова для всіх компетенцій — вона порахована з якості самого логування. Там, де час вносять із запізненням на тижні й великими круглими блоками, ризик пропущених годин вищий.</p>
+  <div class="riskbox">
+    <div>
+      <p><b>Як рахується:</b> базові 5% на дрібну роботу, яку взагалі не заводять у таск-трекер, плюс 0,4 п.п. за кожен відсоток годин, залогованих пізніше ніж через тиждень після роботи. Стеля — 15%. Повзунок множить цю поправку, якщо вважаєте її заниженою або завищеною.</p>
+      <input type="range" class="sl" id="sl" min="0" max="200" step="10" value="100">
+      <div class="slrow"><span>без поправки</span><span>розрахункова</span><span>подвійна</span></div>
+    </div>
+    <div style="text-align:right">
+      <div class="rval" id="rv">+8%</div>
+      <small style="display:block;font-size:11px;color:var(--muted);margin-top:8px">середньозважена надбавка<br>по всіх компонентах</small>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Бенчмарки</h2>
+  <p class="lede">Помаранчева частина смуги — факт, фіолетова — надбавка на недологування. «Було» — відповідний рядок старого budget cap; прочерк означає, що такого рядка в ньому не існувало.</p>
+  <div id="levels"></div>
+</section>
+
+<section>
+  <h2>Звідки взялися відсотки ризику</h2>
+  <p class="lede">Гігієна логування по компонентах. «Того ж дня» — частка годин, внесених у день роботи. «Пізніше тижня» — частка годин, відновлених по пам'яті через тиждень і більше; це головний драйвер надбавки. «Цілі години» — частка годин, залогованих рівними числами без хвилин.</p>
+  <div class="hyg"><table>
+    <thead><tr><th>Компонент</th><th class="r">Годин у даних</th><th class="r">Того ж дня</th>
+      <th class="r">Пізніше тижня</th><th class="r">Цілі години</th><th class="r">Медіанний запис</th><th class="r">Надбавка</th></tr></thead>
+    <tbody id="hygbody"></tbody>
+  </table></div>
+  <div class="warn"><b>Найгірший випадок — Math.</b> Лише 7% годин заводяться в день роботи, 38% — пізніше ніж через тиждень, усе рівними годинами з медіанним записом 6 год. Це не облік часу, а оцінка заднім числом. Поки логування там не зміниться, будь-яка цифра по Math залишиться найменш надійною в таблиці.</div>
+  <p class="note">Ще один окремий випадок: PM-час у Project Activities місцями заводять одним записом на 76–112 годин за період. Такі години реальні й у сумі враховані, але всередині періоду вони розмазані невідомо як, тож тижнева динаміка по цьому компоненту недостовірна.</p>
+</section>
+
+<footer>
+  Метод: підсумок рівня — медіана завершених ігор; розподіл по компонентах — сумарна частка компонента в цьому рівні (пул усіх завершених ігор рівня, стійкіший за медіану на малій вибірці); далі кожен компонент множиться на свою поправку. Через це сума компонентів трохи відрізняється від медіани рівня — це нормально, медіана суми й сума медіан не збігаються.
+  Рівні складності взято з колонки Classification таблиці планування.
+</footer>
+</div>
+<script>
+const D = {"bench": {"Easy": {"n": 5, "basis": "measured", "weeks": 22, "raw_total": 861, "final_total": 929, "old_cap_total": 1005, "p25": 661, "p75": 1059, "games": ["3x3 Football Strike: Hold the Spin", "3x5 Double Blazing", "3x5 Joker: Hold The Spin", "Charged Wins: Power Frames", "Vinnie Volt: Cabaret Wilds"], "rows": {"Art": {"raw": 126, "uplift_pct": 7.6, "final": 136, "old_cap": 200}, "Animation": {"raw": 125, "uplift_pct": 6.1, "final": 133, "old_cap": 175}, "Frontend": {"raw": 119, "uplift_pct": 5.4, "final": 126, "old_cap": 225}, "Backend": {"raw": 44, "uplift_pct": 11.0, "final": 48, "old_cap": 100}, "Math": {"raw": 37, "uplift_pct": 15, "final": 43, "old_cap": 0}, "QA": {"raw": 149, "uplift_pct": 8.5, "final": 162, "old_cap": 175}, "Sounds": {"raw": 52, "uplift_pct": 5.0, "final": 55, "old_cap": 80}, "Text": {"raw": 18, "uplift_pct": 8.4, "final": 20, "old_cap": 50}, "Project Activities": {"raw": 147, "uplift_pct": 9.5, "final": 161, "old_cap": 0}, "Bugs": {"raw": 39, "uplift_pct": 5.3, "final": 41, "old_cap": 0}, "Unassigned": {"raw": 4, "uplift_pct": 5.5, "final": 4, "old_cap": 0}}}, "Easy-Medium": {"n": 2, "basis": "measured", "weeks": 26, "raw_total": 1463, "final_total": 1586, "old_cap_total": 1280, "p25": 1390, "p75": 1537, "games": ["Coin Vortex: Hold the Spin", "Triple Joker Catcher"], "rows": {"Art": {"raw": 159, "uplift_pct": 7.6, "final": 171, "old_cap": 275}, "Animation": {"raw": 186, "uplift_pct": 6.1, "final": 197, "old_cap": 200}, "Frontend": {"raw": 193, "uplift_pct": 5.4, "final": 204, "old_cap": 300}, "Backend": {"raw": 86, "uplift_pct": 11.0, "final": 96, "old_cap": 125}, "Math": {"raw": 132, "uplift_pct": 15, "final": 151, "old_cap": 0}, "QA": {"raw": 206, "uplift_pct": 8.5, "final": 224, "old_cap": 250}, "Sounds": {"raw": 48, "uplift_pct": 5.0, "final": 50, "old_cap": 80}, "Text": {"raw": 39, "uplift_pct": 8.4, "final": 42, "old_cap": 50}, "Project Activities": {"raw": 288, "uplift_pct": 9.5, "final": 316, "old_cap": 0}, "Bugs": {"raw": 71, "uplift_pct": 5.3, "final": 75, "old_cap": 0}, "Bug investigate": {"raw": 51, "uplift_pct": 10.5, "final": 56, "old_cap": 0}, "Unassigned": {"raw": 4, "uplift_pct": 5.5, "final": 4, "old_cap": 0}}}, "Medium": {"n": 6, "basis": "measured", "weeks": 32, "raw_total": 1510, "final_total": 1633, "old_cap_total": 1560, "p25": 1340, "p75": 2051, "games": ["3x5 Royal Piggy: Hold The Spin", "Dynasty Coin 10000: Hold the Spin", "Joker Catcher", "Nitro Wilds", "Only Diamonds", "Vinnie Volt: Devil Wilds"], "rows": {"Art": {"raw": 223, "uplift_pct": 7.6, "final": 240, "old_cap": 350}, "Animation": {"raw": 146, "uplift_pct": 6.1, "final": 155, "old_cap": 225}, "Frontend": {"raw": 208, "uplift_pct": 5.4, "final": 219, "old_cap": 350}, "Backend": {"raw": 109, "uplift_pct": 11.0, "final": 120, "old_cap": 150}, "Math": {"raw": 83, "uplift_pct": 15, "final": 96, "old_cap": 0}, "QA": {"raw": 243, "uplift_pct": 8.5, "final": 263, "old_cap": 325}, "Sounds": {"raw": 63, "uplift_pct": 5.0, "final": 66, "old_cap": 110}, "Text": {"raw": 27, "uplift_pct": 8.4, "final": 29, "old_cap": 50}, "Project Activities": {"raw": 287, "uplift_pct": 9.5, "final": 314, "old_cap": 0}, "Bugs": {"raw": 86, "uplift_pct": 5.3, "final": 90, "old_cap": 0}, "Bug investigate": {"raw": 27, "uplift_pct": 10.5, "final": 30, "old_cap": 0}, "Unassigned": {"raw": 10, "uplift_pct": 5.5, "final": 11, "old_cap": 0}}}, "Medium+": {"n": 0, "basis": "floor", "weeks": 35, "raw_total": 2150, "final_total": 2324, "old_cap_total": 1735, "p25": 1980, "p75": 2472, "games": ["Lava Power (в роботі, вже 1980 год)", "4 Clovers Express (в роботі)"], "rows": {"Art": {"raw": 317, "uplift_pct": 7.6, "final": 341, "old_cap": 400}, "Animation": {"raw": 208, "uplift_pct": 6.1, "final": 221, "old_cap": 250}, "Frontend": {"raw": 295, "uplift_pct": 5.4, "final": 311, "old_cap": 400}, "Backend": {"raw": 155, "uplift_pct": 11.0, "final": 172, "old_cap": 175}, "Math": {"raw": 118, "uplift_pct": 15, "final": 136, "old_cap": 0}, "QA": {"raw": 346, "uplift_pct": 8.5, "final": 375, "old_cap": 350}, "Sounds": {"raw": 89, "uplift_pct": 5.0, "final": 94, "old_cap": 110}, "Text": {"raw": 38, "uplift_pct": 8.4, "final": 41, "old_cap": 50}, "Project Activities": {"raw": 408, "uplift_pct": 9.5, "final": 447, "old_cap": 0}, "Bugs": {"raw": 122, "uplift_pct": 5.3, "final": 128, "old_cap": 0}, "Bug investigate": {"raw": 39, "uplift_pct": 10.5, "final": 43, "old_cap": 0}, "Unassigned": {"raw": 14, "uplift_pct": 5.5, "final": 15, "old_cap": 0}}}, "Hard": {"n": 0, "basis": "extrapolated", "weeks": 40, "raw_total": 2550, "final_total": 2757, "old_cap_total": 2045, "p25": 2150, "p75": 3041, "games": [], "rows": {"Art": {"raw": 376, "uplift_pct": 7.6, "final": 405, "old_cap": 500}, "Animation": {"raw": 247, "uplift_pct": 6.1, "final": 262, "old_cap": 300}, "Frontend": {"raw": 350, "uplift_pct": 5.4, "final": 369, "old_cap": 500}, "Backend": {"raw": 183, "uplift_pct": 11.0, "final": 203, "old_cap": 200}, "Math": {"raw": 140, "uplift_pct": 15, "final": 162, "old_cap": 0}, "QA": {"raw": 410, "uplift_pct": 8.5, "final": 445, "old_cap": 375}, "Sounds": {"raw": 106, "uplift_pct": 5.0, "final": 111, "old_cap": 110}, "Text": {"raw": 45, "uplift_pct": 8.4, "final": 49, "old_cap": 60}, "Project Activities": {"raw": 484, "uplift_pct": 9.5, "final": 530, "old_cap": 0}, "Bugs": {"raw": 144, "uplift_pct": 5.3, "final": 152, "old_cap": 0}, "Bug investigate": {"raw": 46, "uplift_pct": 10.5, "final": 51, "old_cap": 0}, "Unassigned": {"raw": 17, "uplift_pct": 5.5, "final": 18, "old_cap": 0}}}, "Reskin Medium": {"n": 1, "basis": "measured", "weeks": 23, "raw_total": 909, "final_total": 973, "old_cap_total": 1010, "p25": 909, "p75": 909, "games": ["Vinnie Volt: Dracula Wilds"], "rows": {"Art": {"raw": 261, "uplift_pct": 7.6, "final": 281, "old_cap": 400}, "Animation": {"raw": 196, "uplift_pct": 6.1, "final": 208, "old_cap": 225}, "Frontend": {"raw": 72, "uplift_pct": 5.4, "final": 76, "old_cap": 150}, "Backend": {"raw": 3, "uplift_pct": 11.0, "final": 3, "old_cap": 0}, "QA": {"raw": 89, "uplift_pct": 8.5, "final": 96, "old_cap": 125}, "Sounds": {"raw": 90, "uplift_pct": 5.0, "final": 94, "old_cap": 100}, "Text": {"raw": 10, "uplift_pct": 8.4, "final": 11, "old_cap": 10}, "Project Activities": {"raw": 166, "uplift_pct": 9.5, "final": 182, "old_cap": 0}, "Bugs": {"raw": 16, "uplift_pct": 5.3, "final": 17, "old_cap": 0}, "Unassigned": {"raw": 5, "uplift_pct": 5.5, "final": 5, "old_cap": 0}}}}, "hyg": {"Animation": {"late7": 2.7, "same_day": 63, "whole": 89, "median_entry": 2.5, "uplift": 6.1, "hours": 2674}, "Art": {"late7": 6.4, "same_day": 41, "whole": 52, "median_entry": 2.0, "uplift": 7.6, "hours": 3696}, "Backend": {"late7": 15.0, "same_day": 20, "whole": 85, "median_entry": 3.0, "uplift": 11.0, "hours": 1443}, "Bug investigate": {"late7": 13.8, "same_day": 52, "whole": 30, "median_entry": 1.5, "uplift": 10.5, "hours": 323}, "Bugs": {"late7": 0.7, "same_day": 59, "whole": 75, "median_entry": 1.0, "uplift": 5.3, "hours": 1055}, "Frontend": {"late7": 0.9, "same_day": 50, "whole": 78, "median_entry": 2.0, "uplift": 5.4, "hours": 2907}, "Math": {"late7": 38.4, "same_day": 7, "whole": 100, "median_entry": 6.0, "uplift": 15, "hours": 1338}, "Project Activities": {"late7": 11.3, "same_day": 50, "whole": 55, "median_entry": 1.0, "uplift": 9.5, "hours": 4014}, "QA": {"late7": 8.8, "same_day": 52, "whole": 40, "median_entry": 1.5, "uplift": 8.5, "hours": 3275}, "Sounds": {"late7": 0.0, "same_day": 68, "whole": 99, "median_entry": 7.0, "uplift": 5.0, "hours": 1117}, "Text": {"late7": 8.5, "same_day": 47, "whole": 88, "median_entry": 2.0, "uplift": 8.4, "hours": 435}, "Unassigned": {"late7": 1.2, "same_day": 39, "whole": 83, "median_entry": 1.0, "uplift": 5.5, "hours": 104}}, "levels": ["Easy", "Easy-Medium", "Medium", "Medium+", "Hard", "Reskin Medium"], "conf": {"Easy": ["Середня", "5 завершених ігор. Розкид великий: 661–1059 год без урахування Cabaret Wilds (167 год — схоже на неповний скоуп)."], "Easy-Medium": ["Низька", "Лише 2 завершені гри. Цифра тримається на Coin Vortex і Triple Joker Catcher — третій проєкт може її помітно зсунути."], "Medium": ["Висока", "6 завершених ігор, стабільний профіль по компонентах. Це найнадійніша цифра в таблиці."], "Medium+": ["Низька", "Жодної завершеної гри. Lava Power уже набрала 1980 год і ще в роботі — це підлога, а не оцінка. Прогноз добудований по частці Release Candidate у завершених проєктах."], "Hard": ["Дуже низька", "Даних немає взагалі. Цифра отримана масштабуванням Medium+ через співвідношення старих кепів. Це гіпотеза для старту, її треба замінити фактом після першої Hard-гри."], "Reskin Medium": ["Дуже низька", "Одна гра — Vinnie Volt: Dracula Wilds. Профіль характерний для рескіну (Art + Animation це половина), але одна точка не є бенчмаркою."]}, "group": {"Art": "Продакшн", "Animation": "Продакшн", "Frontend": "Продакшн", "Backend": "Продакшн", "Math": "Продакшн", "QA": "Якість", "Bugs": "Якість", "Bug investigate": "Якість", "Sounds": "Продакшн", "Text": "Продакшн", "Project Activities": "Менеджмент", "Unassigned": "Інше"}, "cname": {"Project Activities": "Project Activities", "Bug investigate": "Bug investigate", "Unassigned": "Без компонента"}};
+const fmt = n => Math.round(n).toLocaleString('uk-UA').replace(/\u00a0/g,' ');
+const BADGE = {'Висока':'b-high','Середня':'b-mid','Низька':'b-low','Дуже низька':'b-low'};
+let k = 1;
+
+function render(){
+  let wsum=0, wtot=0;
+  document.getElementById('levels').innerHTML = D.levels.map(lv=>{
+    const b = D.bench[lv];
+    const rows = Object.entries(b.rows).map(([c,r])=>{
+      const up = r.uplift_pct * k;
+      const fin = r.raw * (1 + up/100);
+      wsum += r.raw * up/100; wtot += r.raw;
+      return {c, raw:r.raw, up, fin, old:r.old_cap};
+    }).sort((a,b2)=>b2.fin-a.fin);
+    const total = rows.reduce((s,r)=>s+r.fin,0);
+    const mx = Math.max(...rows.map(r=>r.fin));
+    const [conf, why] = D.conf[lv];
+    const dOld = b.old_cap_total ? Math.round((total/b.old_cap_total-1)*100) : null;
+    return `<div class="lvl">
+      <div class="lvl-head">
+        <div><h3>${lv}<span class="badge ${BADGE[conf]}">довіра: ${conf.toLowerCase()}</span></h3>
+          <p class="why">${why}</p></div>
+        <div class="tot"><b>${fmt(total)}</b><span>годин на гру · ~${b.weeks} тижнів</span>
+          ${dOld!==null?`<div class="delta ${dOld>0?'up':'dn'}">старий кеп ${fmt(b.old_cap_total)} — це ${dOld>0?'на '+dOld+'% менше за потрібне':'на '+Math.abs(dOld)+'% більше за потрібне'}</div>`:''}
+        </div></div>
+      <table><thead><tr><th>Компетенція</th><th style="width:34%">Розподіл</th>
+        <th class="r">Факт</th><th class="r">+ризик</th><th class="r">Бенчмарк</th><th class="r">Було в кепі</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr>
+        <td>${D.cname[r.c]||r.c}<span class="gtag">${D.group[r.c]||''}</span></td>
+        <td><div class="bar"><i style="width:${r.raw/mx*100}%"></i>
+          <u style="left:${r.raw/mx*100}%;width:${(r.fin-r.raw)/mx*100}%"></u></div></td>
+        <td class="r num">${fmt(r.raw)}</td>
+        <td class="r num" style="color:var(--risk)">+${fmt(r.fin-r.raw)}</td>
+        <td class="r num new">${fmt(r.fin)}</td>
+        <td class="r ${r.old?'was num':'miss'}">${r.old?fmt(r.old):'не було'}</td></tr>`).join('')}
+      </tbody></table></div>`;
+  }).join('');
+  document.getElementById('rv').textContent = '+' + (wtot?Math.round(wsum/wtot*100):0) + '%';
+}
+
+document.getElementById('hygbody').innerHTML = Object.entries(D.hyg)
+  .sort((a,b)=>b[1].hours-a[1].hours).map(([c,h])=>`<tr>
+    <td>${D.cname[c]||c}</td><td class="r num">${fmt(h.hours)}</td>
+    <td class="r"><span class="pill ${h.same_day<25?'hot':(h.same_day<45?'warm':'')}">${h.same_day}%</span></td>
+    <td class="r"><span class="pill ${h.late7>20?'hot':(h.late7>8?'warm':'')}">${h.late7}%</span></td>
+    <td class="r"><span class="pill ${h.whole>=95?'warm':''}">${h.whole}%</span></td>
+    <td class="r num">${h.median_entry} год</td>
+    <td class="r num" style="color:var(--risk);font-weight:600">+${h.uplift}%</td></tr>`).join('');
+
+document.getElementById('sl').oninput = e => { k = e.target.value/100; render(); };
+render();
+</script></body></html>
